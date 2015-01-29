@@ -1,0 +1,123 @@
+
+state 0
+	$accept: .input $end 
+	input: .    (1)
+
+	.  reduce 1 (src line 14)
+
+	input  goto 1
+
+state 1
+	$accept:  input.$end 
+	input:  input.line 
+
+	$end  accept
+	NUM  shift 5
+	'\n'  shift 3
+	.  error
+
+	line  goto 2
+	exp  goto 4
+
+state 2
+	input:  input line.    (2)
+
+	.  reduce 2 (src line 15)
+
+
+state 3
+	line:  '\n'.    (3)
+
+	.  reduce 3 (src line 18)
+
+
+state 4
+	line:  exp.'\n' 
+	exp:  exp.exp '+' 
+	exp:  exp.exp '-' 
+	exp:  exp.exp '*' 
+	exp:  exp.exp '/' 
+	exp:  exp.'n' 
+
+	NUM  shift 5
+	'\n'  shift 6
+	'n'  shift 8
+	.  error
+
+	exp  goto 7
+
+state 5
+	exp:  NUM.    (5)
+
+	.  reduce 5 (src line 22)
+
+
+state 6
+	line:  exp '\n'.    (4)
+
+	.  reduce 4 (src line 19)
+
+
+state 7
+	exp:  exp.exp '+' 
+	exp:  exp exp.'+' 
+	exp:  exp.exp '-' 
+	exp:  exp exp.'-' 
+	exp:  exp.exp '*' 
+	exp:  exp exp.'*' 
+	exp:  exp.exp '/' 
+	exp:  exp exp.'/' 
+	exp:  exp.'n' 
+
+	NUM  shift 5
+	'+'  shift 9
+	'-'  shift 10
+	'*'  shift 11
+	'/'  shift 12
+	'n'  shift 8
+	.  error
+
+	exp  goto 7
+
+state 8
+	exp:  exp 'n'.    (10)
+
+	.  reduce 10 (src line 28)
+
+
+state 9
+	exp:  exp exp '+'.    (6)
+
+	.  reduce 6 (src line 23)
+
+
+state 10
+	exp:  exp exp '-'.    (7)
+
+	.  reduce 7 (src line 24)
+
+
+state 11
+	exp:  exp exp '*'.    (8)
+
+	.  reduce 8 (src line 25)
+
+
+state 12
+	exp:  exp exp '/'.    (9)
+
+	.  reduce 9 (src line 26)
+
+
+10 terminals, 4 nonterminals
+11 grammar rules, 13/2000 states
+0 shift/reduce, 0 reduce/reduce conflicts reported
+53 working sets used
+memory: parser 3/30000
+5 extra closures
+11 shift entries, 1 exceptions
+4 goto entries
+1 entries saved by goto default
+Optimizer space used: output 15/30000
+15 table entries, 0 zero
+maximum spread: 10, maximum offset: 4
