@@ -1,26 +1,11 @@
-CC      = clang
-CFLAGS  = -g
-LDFLAGS = -ll -ly
+dragon: dragon.c parse scan
+	$(CC) -g -o dragon dragon.c parse.tab.c scan.c -ll
 
-objects = scan.o parse.o dragon.o
+parse: parse.y
+	bison -d -v parse.y
 
-dragon: $(objects)
-	$(CC) -o $@ $(LDFLAGS) $^
-
-dragon.o: dragon.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ -c $^
-
-scan.o: scan.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ -c $^
-
-scan.c: scan.l
-	flex -o $@ $^
-
-parse.o: parse.tab.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ -c $^
-
-parse.tab.c: parse.y
-	bison -d -v $^
+scan: scan.l
+	flex -o scan.c scan.l
 
 clean:
-	$(RM) *.o scan.c dragon
+	$(RM) *.o scan.c dragon parse.tab.*
