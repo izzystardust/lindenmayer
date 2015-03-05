@@ -2,6 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "parse.tab.h"
+
+int yylex();
+void yyerror(const char *s);
+
 %}
 
 %token NUM
