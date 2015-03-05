@@ -1,7 +1,20 @@
-#include "parse.tab.h"
+#include <stdlib.h>
 
-extern int yyparse();
+#include "lemon.h"
+#include "scan.h"
+#include "sglib.h"
+
+/* lemon functions */
+void *ParseAlloc();
+void Parse();
+void ParseFree();
 
 int main() {
-	yyparse();
+	void *lexer;
+	yylex_init(&lexer);
+	void *parser = ParseAlloc(malloc);
+	for (;;) {
+		int token = yylex();
+		Parse(parser, token, yytext);
+	}
 }

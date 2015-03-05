@@ -1,11 +1,11 @@
 dragon: dragon.c parse scan
-	$(CC) -g -o dragon dragon.c parse.tab.c scan.c -ll
+	$(CC) -g -o dragon dragon.c lemon.c scan.c -ll
 
-parse: parse.y
-	bison -d -v parse.y
+parse: lemon.y
+	lemon lemon.y
 
 scan: scan.l
-	flex -o scan.c scan.l
+	flex --header-file=scan.h -o scan.c scan.l
 
 clean:
-	$(RM) *.o scan.c dragon parse.tab.*
+	$(RM) *.o scan.c dragon lemon.c lemon.h scan.h
