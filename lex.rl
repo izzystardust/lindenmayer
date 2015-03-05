@@ -1,0 +1,5 @@
+%%{
+
+	machine pascal_lexer;
+
+}%%
