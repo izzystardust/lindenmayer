@@ -1,4 +1,5 @@
 dragon
 *.o
-parse.c
-y.tab.h
+*.tab.*
+scan.c
+
