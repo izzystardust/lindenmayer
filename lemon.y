@@ -53,7 +53,7 @@ program ::=
 identifier_list ::= ID.
 identifier_list ::= identifier_list COMMA ID.
 
-declarations ::= declarations VAR identifier_list COLON.
+declarations ::= declarations VAR identifier_list COLON type SEMI.
 declarations ::= .
 
 type ::= standard_type.
