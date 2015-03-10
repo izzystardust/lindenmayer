@@ -2,11 +2,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "parse.tab.h"
+#include "tree.h"
 
 int yylex();
 void yyerror(const char *s);
 
 %}
+
+%union {
+	int ival;
+	float rval;
+	char *sval;
+	int opval;
+
+	tree_t *tval;
+}
 
 %token NUM
 %token ID
