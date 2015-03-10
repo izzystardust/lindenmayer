@@ -3,8 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "lemon.h"
+#include "union.h"
 
-#define DEBUG_PRINT
+#define YYSTYPE lexer_ut
+//#define DEBUG_PRINT
 
 // does this make me a bad person?
 #ifdef DEBUG_PRINT
@@ -14,13 +16,15 @@
 #define S_RET(it)	return it
 #define S_RETT(it)	return it
 #endif
+
 %}
 
-%option noyywrap yylineno
+%option reentrant bison-bridge noyywrap yylineno
 %option full
 
 ident		[a-zA-Z][a-zA-Z0-9]*
 number		[0-9]+
+real            [0-9]+"."[0-9]*
 whitespace	[ \t]+
 
 %%
@@ -71,17 +75,12 @@ whitespace	[ \t]+
 ";"		{ S_RET(SEMI); }
 "."		{ S_RET(DOT); }
 
-{number}	{ S_RETT(NUM); }
-{ident}		{ S_RETT(ID); }
+{number}	{ yylval->ival = atoi(yytext); S_RETT(INUM); }
+{real}          { yylval->rval = atof(yytext); S_RETT(RNUM); }
+{ident}		{ yylval->sval = strdup(yytext); S_RETT(ID); }
 
 {whitespace}	{ ; }
 \n		{ fprintf(stderr, "%s", yytext); }
 .		{ fprintf(stderr, "\nYou forgot something: <%c>\n", yytext[0]); return yytext[0]; }
 
 %%
-
-void yyerror(char *msg)
-{
-	fprintf(stderr, "Error: %s\n", msg);
-	exit(1);
-}

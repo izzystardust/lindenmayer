@@ -1,5 +1,7 @@
 #include <stdlib.h>
 
+#define YYSTYPE lexer_ut
+
 #include "lemon.h"
 #include "union.h"
 #include "scan.h"
@@ -10,29 +12,34 @@ void *ParseAlloc();
 void Parse();
 void ParseFree();
 
-int get_next_token(lexer_item *it) {
-	it->type = yylex();
-	it->attr.sval = strdup(yytext);
+int get_next_token(void *lexer, lexer_item *it) {
+	it->type = yylex(&it->attr, lexer);
 	return it->type;
 }
 
-void parse() {
+void parse(FILE *f) {
+	void *lexer;
+	yylex_init(&lexer);
 	void *parser = ParseAlloc(malloc);
-	lexer_item it;
-	while (get_next_token(&it)) {
-		//lexer_item_print(it);
-		Parse(parser, it.type, it);
+	yyset_in(f, lexer);
+
+	lexer_item val;
+
+	while (get_next_token(lexer, &val)) {
+		lexer_item_print(val);
+		Parse(parser, val.type, val);
 	}
-	Parse(parser, 0, it);
+	Parse(parser, 0, val);
 	ParseFree(parser, free);
 }
 
 int main(int argc, char **argv) {
+	FILE *in = stdin;
 	if (argc > 1) {
 		FILE *a = fopen(argv[1], "r");
 		if (NULL != a) {
-			yyin = a;
+			in = a;
 		}
 	}
-	parse();
+	parse(in);
 }
