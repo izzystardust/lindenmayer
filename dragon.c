@@ -16,13 +16,23 @@ int get_next_token(lexer_item *it) {
 	return it->type;
 }
 
-int main() {
+void parse() {
 	void *parser = ParseAlloc(malloc);
 	lexer_item it;
 	while (get_next_token(&it)) {
-		lexer_item_print(it);
+		//lexer_item_print(it);
 		Parse(parser, it.type, it);
 	}
 	Parse(parser, 0, it);
 	ParseFree(parser, free);
+}
+
+int main(int argc, char **argv) {
+	if (argc > 1) {
+		FILE *a = fopen(argv[1], "r");
+		if (NULL != a) {
+			yyin = a;
+		}
+	}
+	parse();
 }

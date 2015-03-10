@@ -2,6 +2,7 @@ dragon
 *.o
 *.tab.*
 scan.c
+scan.h
 *.swp
 *.out
 *.dSYM
