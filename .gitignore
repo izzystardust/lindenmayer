@@ -11,3 +11,4 @@ lemon.c
 lemon.h
 lex.h
 *.output
+sym.*
