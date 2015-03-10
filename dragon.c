@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
 #include "lemon.h"
+#include "union.h"
 #include "scan.h"
 #include "sglib.h"
 
@@ -9,12 +10,19 @@ void *ParseAlloc();
 void Parse();
 void ParseFree();
 
+int get_next_token(lexer_item *it) {
+	it->type = yylex();
+	it->attr.sval = strdup(yytext);
+	return it->type;
+}
+
 int main() {
-	void *lexer;
-	yylex_init(&lexer);
 	void *parser = ParseAlloc(malloc);
-	for (;;) {
-		int token = yylex();
-		Parse(parser, token, yytext);
+	lexer_item it;
+	while (get_next_token(&it)) {
+		lexer_item_print(it);
+		Parse(parser, it.type, it);
 	}
+	Parse(parser, 0, it);
+	ParseFree(parser, free);
 }

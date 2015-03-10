@@ -2,9 +2,6 @@
  * This is a lemon parser
  * Because I'm a special snowflake
  */
-/*
-%token_prefix TK_
-*/
 
 %token_type   {int}
 %default_type {int}
@@ -14,7 +11,13 @@
 }
 
 %syntax_error {
-	fprintf(stderr, "error: syntax error");
+	int n = sizeof(yyTokenName) / sizeof(yyTokenName[0]);
+	for (int i = 0; i < n; ++i) {
+		int a = yy_find_shift_action(yypParser, (YYCODETYPE)i);
+		if (a < YYNSTATE + YYNRULE) {
+			printf("possible token: %s\n", yyTokenName[i]);
+		}
+	}
 }
 
 %nonassoc NUM.

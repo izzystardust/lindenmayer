@@ -16,7 +16,7 @@
 #endif
 %}
 
-%option reentrant bison-bridge bison-locations noyywrap yylineno
+%option noyywrap yylineno
 %option full
 
 ident		[a-zA-Z][a-zA-Z0-9]*
@@ -62,12 +62,21 @@ whitespace	[ \t]+
 "div"		{ S_RETT(MULOP); }
 "mod"		{ S_RETT(MULOP); }
 
+"("             { S_RET(LPAREN); }
+")"             { S_RET(RPAREN); }
+"["             { S_RET(LBRKT); }
+"]"             { S_RET(RBRKT); }
+","		{ S_RET(COMMA); }
+":"		{ S_RET(COLON); }
+";"		{ S_RET(SEMI); }
+"."		{ S_RET(DOT); }
+
 {number}	{ S_RETT(NUM); }
 {ident}		{ S_RETT(ID); }
 
 {whitespace}	{ ; }
 \n		{ fprintf(stderr, "%s", yytext); }
-.		{ fprintf(stderr, "<%c>", yytext[0]); return yytext[0]; }
+.		{ fprintf(stderr, "\nYou forgot something: <%c>\n", yytext[0]); return yytext[0]; }
 
 %%
 
