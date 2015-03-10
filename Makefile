@@ -11,4 +11,4 @@ strings: parse
 	go run fix.go lemon.h
 
 clean:
-	$(RM) *.o scan.c dragon lemon.c lemon.h scan.h
+	$(RM) *.o scan.c dragon lemon.c lemon.h scan.h sym.h sym.c
