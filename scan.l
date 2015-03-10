@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "parse.tab.h"
+#include "lemon.h"
 
 #define DEBUG_PRINT
 
@@ -15,6 +15,9 @@
 #define S_RETT(it)	return it
 #endif
 %}
+
+%option reentrant bison-bridge bison-locations noyywrap yylineno
+%option full
 
 ident		[a-zA-Z][a-zA-Z0-9]*
 number		[0-9]+
@@ -72,8 +75,4 @@ void yyerror(char *msg)
 {
 	fprintf(stderr, "Error: %s\n", msg);
 	exit(1);
-}
-
-int yywrap() {
-	return 1;
 }
