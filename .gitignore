@@ -5,3 +5,8 @@ scan.c
 *.swp
 *.out
 *.dSYM
+.DS_Store
+lemon.c
+lemon.h
+lex.h
+*.output
