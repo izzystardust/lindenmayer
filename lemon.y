@@ -10,6 +10,7 @@
 	#include <assert.h>
 }
 
+// http://stackoverflow.com/questions/11705737/expected-token-using-lemon-parser-generator
 %syntax_error {
 	int n = sizeof(yyTokenName) / sizeof(yyTokenName[0]);
 	for (int i = 0; i < n; ++i) {
