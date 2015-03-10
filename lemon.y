@@ -21,7 +21,7 @@
 	}
 }
 
-%nonassoc NUM.
+%nonassoc INUM RNUM.
 %nonassoc ID.
 %nonassoc PLUS.
 %nonassoc MINUS.
@@ -112,7 +112,8 @@ term ::= term MULOP factor.
 
 factor ::= ID.
 factor ::= ID LPAREN expression_list RPAREN.
-factor ::= NUM.
+factor ::= INUM.
+factor ::= RNUM.
 factor ::= LPAREN expression RPAREN.
 factor ::= NOT factor.
 
