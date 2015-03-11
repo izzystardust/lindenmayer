@@ -2,4 +2,13 @@ dragon
 *.o
 *.tab.*
 scan.c
-
+scan.h
+*.swp
+*.out
+*.dSYM
+.DS_Store
+lemon.c
+lemon.h
+lex.h
+*.output
+sym.*
