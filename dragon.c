@@ -10,6 +10,7 @@
 #include "union.h"
 #include "scan.h"
 #include "sglib.h"
+#include "tree.h"
 
 /* lemon functions */
 void *ParseAlloc();
@@ -21,7 +22,9 @@ int get_next_token(void *lexer, lexer_item *it) {
 	return it->type;
 }
 
-void parse(FILE *f) {
+tree_t *root = NULL;
+
+tree_t * parse(FILE *f) {
 	void *lexer;
 	yylex_init(&lexer);
 	void *parser = ParseAlloc(malloc);
@@ -35,6 +38,8 @@ void parse(FILE *f) {
 	}
 	Parse(parser, 0, val);
 	ParseFree(parser, free);
+
+	return root;
 }
 
 int main(int argc, char **argv) {
@@ -45,5 +50,6 @@ int main(int argc, char **argv) {
 			in = a;
 		}
 	}
-	parse(in);
+	tree_t * t = parse(in);
+	print_tree(t);
 }

@@ -3,12 +3,18 @@
  * Because I'm a special snowflake
  */
 
-%token_type   {int}
-%default_type {int}
 
 %include {
+	#include <stdlib.h>
 	#include <assert.h>
+	#include "lemon.h"
+	#include "tree.h"
+
+	extern tree_t *root;
 }
+
+%token_type     {tree_t *} // default type for terminals
+%default_type   {tree_t *} // default type for nonterminals
 
 // http://stackoverflow.com/questions/11705737/expected-token-using-lemon-parser-generator
 %syntax_error {
@@ -43,14 +49,32 @@
 %left RELOP.
 %left ADDOP.
 %left MULOP.
+%left NOT.
 
-program ::=
-	PROGRAM ID LPAREN identifier_list RPAREN SEMI
-	declarations
-	subprogram_declarations
-	compound_statement
+program(A) ::=
+	PROGRAM ID(I) LPAREN identifier_list(L) RPAREN SEMI
+	declarations(D)
+	subprogram_declarations(S)
+	compound_statement(C)
 	DOT.
-
+	{
+		int n = 5;
+		tree_t **children = calloc(n, sizeof(tree_t *));
+		children[0] = I;
+		children[0] = NULL;
+		children[1] = L;
+		children[1] = NULL;
+		children[2] = D;
+		children[2] = NULL;
+		children[3] = S;
+		children[3] = NULL;
+		children[4] = C;
+		children[4] = NULL;
+		root = make_tree(PROGRAM, children, n);
+		fprintf(stderr, "t: %p\n", root);
+		print_tree(root);
+		A = root;
+	}
 identifier_list ::= ID.
 identifier_list ::= identifier_list COMMA ID.
 
@@ -110,12 +134,12 @@ simple_expression ::= simple_expression ADDOP term.
 term ::= factor.
 term ::= term MULOP factor.
 
-factor ::= ID.
+factor(A) ::= ID(B). { A = make_list(ID, B); }
 factor ::= ID LPAREN expression_list RPAREN.
-factor ::= INUM.
-factor ::= RNUM.
-factor ::= LPAREN expression RPAREN.
-factor ::= NOT factor.
+factor(A) ::= INUM(B). { A = make_list(INUM, B); }
+factor(A) ::= RNUM(B). { A = make_list(RNUM, B); }
+factor(A) ::= LPAREN expression(B) RPAREN. { A = B; }
+factor(A) ::= NOT factor(B). { A = make_list(NOT, B); }
 
 sign ::= PLUS.
 sign ::= MINUS.

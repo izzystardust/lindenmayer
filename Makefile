@@ -1,5 +1,5 @@
 dragon: dragon.c parse scan strings
-	$(CC) -g -o dragon dragon.c lemon.c scan.c union.c sym.c -ll
+	$(CC) -g -o dragon dragon.c lemon.c scan.c union.c sym.c tree.c
 
 parse: lemon.y
 	lemon lemon.y
