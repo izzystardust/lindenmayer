@@ -57,9 +57,11 @@ char *sym_to_string(int sym);
 	}
 
 	fmt.Fprintf(f, `
+#include <stdio.h>
 #include "sym.h"
 
 char *sym_to_string(int sym) {
+	char *ret;
 	switch (sym) {
 `)
 
@@ -68,8 +70,10 @@ char *sym_to_string(int sym) {
 		fmt.Fprintf(f, "\n")
 	}
 
-	fmt.Fprintf(f, `
-		default: return "YOU DID A BAD-BAD!";
+	fmt.Fprint(f, `
+		default:
+			asprintf(&ret, "sym_to_string: YOU DID A BAD-BAD: %d not a good symbol", sym);
+			return ret;
 	}
 }`)
 }
