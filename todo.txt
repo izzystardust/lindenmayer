@@ -1,0 +1,3 @@
+- Finish building parse tree
+- Build symbol table:
+	symtab *build_symbol_table(tree_t *syntax_tree_root);
