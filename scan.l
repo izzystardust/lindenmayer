@@ -6,16 +6,6 @@
 #include "union.h"
 
 #define YYSTYPE lexer_ut
-//#define DEBUG_PRINT
-
-// does this make me a bad person?
-#ifdef DEBUG_PRINT
-#define S_RET(it) 	fprintf(stderr, "{%s}", #it); return it
-#define S_RETT(it) 	fprintf(stderr, "{%s[%s]}", #it, yytext); return it
-#else
-#define S_RET(it)	return it
-#define S_RETT(it)	return it
-#endif
 
 %}
 
@@ -29,58 +19,58 @@ whitespace	[ \t]+
 
 %%
 
-"program"	{ S_RET(PROGRAM); }
-"array"		{ S_RET(ARRAY); }
-"of"		{ S_RET(OF); }
-"integer"	{ S_RET(INTEGER); }
-"real"		{ S_RET(REAL); }
-"function"	{ S_RET(FUNCTION); }
-"proceduce"	{ S_RET(PROCEDURE); }
-"begin"		{ S_RET(BBEGIN); }
-"end"		{ S_RET(END); }
-"if"		{ S_RET(IF); }
-"then"		{ S_RET(THEN); }
-"else"		{ S_RET(ELSE); }
-"while"		{ S_RET(WHILE); }
-"do"		{ S_RET(DO); }
-"not"		{ S_RET(NOT); }
-"var"		{ S_RET(VAR); }
+"program"	{ return PROGRAM; }
+"array"		{ return ARRAY; }
+"of"		{ return OF; }
+"integer"	{ return INTEGER; }
+"real"		{ return REAL; }
+"function"	{ return FUNCTION; }
+"proceduce"	{ return PROCEDURE; }
+"begin"		{ return BBEGIN; }
+"end"		{ return END; }
+"if"		{ return IF; }
+"then"		{ return THEN; }
+"else"		{ return ELSE; }
+"while"		{ return WHILE; }
+"do"		{ return DO; }
+"not"		{ return NOT; }
+"var"		{ return VAR; }
 
-".."		{ S_RET(DOTDOT); }
-":="		{ S_RET(ASSIGNOP); }
+".."		{ return DOTDOT; }
+":="		{ return ASSIGNOP; }
 
-"="		{ S_RETT(RELOP); }
-"<>"		{ S_RETT(RELOP); }
-"<"		{ S_RETT(RELOP); }
-">"		{ S_RETT(RELOP); }
-"<="		{ S_RETT(RELOP); }
-">="		{ S_RETT(RELOP); }
+"="		{ return RELOP; }
+"<>"		{ return RELOP; }
+"<"		{ return RELOP; }
+">"		{ return RELOP; }
+"<="		{ return RELOP; }
+">="		{ return RELOP; }
 
-"+"		{ S_RETT(ADDOP); }
-"-"		{ S_RETT(ADDOP); }
-"or"		{ S_RETT(ADDOP); }
+"+"		{ return ADDOP; }
+"-"		{ return ADDOP; }
+"or"		{ return ADDOP; }
 
-"and"		{ S_RETT(MULOP); }
-"*"		{ S_RETT(MULOP); }
-"/"		{ S_RETT(MULOP); }
-"div"		{ S_RETT(MULOP); }
-"mod"		{ S_RETT(MULOP); }
+"and"		{ return MULOP; }
+"*"		{ return MULOP; }
+"/"		{ return MULOP; }
+"div"		{ return MULOP; }
+"mod"		{ return MULOP; }
 
-"("             { S_RET(LPAREN); }
-")"             { S_RET(RPAREN); }
-"["             { S_RET(LBRKT); }
-"]"             { S_RET(RBRKT); }
-","		{ S_RET(COMMA); }
-":"		{ S_RET(COLON); }
-";"		{ S_RET(SEMI); }
-"."		{ S_RET(DOT); }
+"("             { return LPAREN; }
+")"             { return RPAREN; }
+"["             { return LBRKT; }
+"]"             { return RBRKT; }
+","		{ return COMMA; }
+":"		{ return COLON; }
+";"		{ return SEMI; }
+"."		{ return DOT; }
 
-{number}	{ yylval->ival = atoi(yytext); S_RETT(INUM); }
-{real}          { yylval->rval = atof(yytext); S_RETT(RNUM); }
-{ident}		{ yylval->sval = strdup(yytext); S_RETT(ID); }
+{number}	{ yylval->ival = atoi(yytext); return INUM; }
+{real}          { yylval->rval = atof(yytext); return RNUM; }
+{ident}		{ yylval->sval = strdup(yytext); return ID; }
 
 {whitespace}	{ ; }
 \n		{ fprintf(stderr, "%s", yytext); }
-.		{ fprintf(stderr, "\nYou forgot something: <%c>\n", yytext[0]); return yytext[0]; }
+.		{ fprintf(stderr, "\nYou forgot something: <%c>\n", yytext[0]); return 0; }
 
 %%
