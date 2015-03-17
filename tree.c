@@ -23,6 +23,13 @@ tree_t *make_list(int type, tree_t *next) {
 	return make_tree(type, new, 1);
 }
 
+tree_t *make_bint(int type, tree_t *left, tree_t *right) {
+	tree_t **new = calloc(sizeof(tree_t *), 2);
+	new[0] = left;
+	new[1] = right;
+	return make_tree(type, new, 2);
+}
+
 tree_t *make_leaf(lexer_item it) {
 	tree_t *p = malloc(sizeof(tree_t));
 	p->type = it.type;

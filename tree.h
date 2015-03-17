@@ -12,6 +12,7 @@ typedef struct tree_s {
 
 tree_t *make_tree(int type, tree_t **children, size_t n);
 tree_t *make_list(int type, tree_t *next);
+tree_t *make_bint(int type, tree_t *left, tree_t *right);
 tree_t *make_leaf(lexer_item it);
 void add_child(tree_t *parent, tree_t *child);
 
