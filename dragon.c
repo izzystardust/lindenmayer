@@ -4,7 +4,7 @@
 // additional argument that is the union structure from bison. I'm not using
 // bison, so I need to do it's job with the YYSTYPE. I define the union in
 // union.h, but scan.h refers to it and so it must be defined before scan.h
-#define YYSTYPE lexer_ut
+#define YYSTYPE attr_t
 
 #include "lemon.h"
 #include "union.h"

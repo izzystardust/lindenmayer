@@ -1,15 +1,16 @@
 #ifndef _union_h_
 #define _union_h_
 
-typedef union lexer_u {
+typedef union attr_u {
 	int ival;
+	int opval;
 	float rval;
 	char *sval;
-} lexer_ut;
+} attr_t;
 
 typedef struct lexer_item_s {
 	int type;
-	lexer_ut attr;
+	attr_t attr;
 } lexer_item;
 
 void lexer_item_print(lexer_item it);

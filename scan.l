@@ -5,7 +5,7 @@
 #include "lemon.h"
 #include "union.h"
 
-#define YYSTYPE lexer_ut
+#define YYSTYPE attr_t
 
 %}
 

@@ -7,14 +7,16 @@
 %include {
 	#include <stdlib.h>
 	#include <assert.h>
+	#include "union.h"
 	#include "lemon.h"
 	#include "tree.h"
 
 	extern tree_t *root;
 }
 
-%token_type     {tree_t *} // default type for terminals
-%default_type   {tree_t *} // default type for nonterminals
+%token_type     {lexer_item}            // default type for terminals
+%default_type   {tree_t *}            // default type for nonterminals
+//%extra_argument {lexer_item_s *lexed} // lexer context
 
 // http://stackoverflow.com/questions/11705737/expected-token-using-lemon-parser-generator
 %syntax_error {
@@ -131,13 +133,13 @@ simple_expression ::= term.
 simple_expression ::= sign term.
 simple_expression ::= simple_expression ADDOP term.
 
-term ::= factor.
+term(T) ::= factor(F). { T = F; }
 term ::= term MULOP factor.
 
-factor(A) ::= ID(B). { A = make_list(ID, B); }
+factor(A) ::= ID(B). { A = make_leaf(B); }
 factor ::= ID LPAREN expression_list RPAREN.
-factor(A) ::= INUM(B). { A = make_list(INUM, B); }
-factor(A) ::= RNUM(B). { A = make_list(RNUM, B); }
+factor(A) ::= INUM(I). { A = make_leaf(I); }
+factor(A) ::= RNUM(R). { A = make_leaf(R); }
 factor(A) ::= LPAREN expression(B) RPAREN. { A = B; }
 factor(A) ::= NOT factor(B). { A = make_list(NOT, B); }
 
