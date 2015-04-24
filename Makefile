@@ -12,3 +12,6 @@ strings: parse
 
 clean:
 	$(RM) *.o scan.c dragon lemon.c lemon.h scan.h sym.h sym.c lemon.out parse.output parse.tab.*
+
+ctags:
+	ctags -R .

@@ -33,10 +33,10 @@ tree_t * parse(FILE *f) {
 	lexer_item val;
 
 	while (get_next_token(lexer, &val)) {
-		lexer_item_print(val);
-		Parse(parser, val.type, val);
+		//lexer_item_print(val);
+		Parse(parser, val.type, val, &root);
 	}
-	Parse(parser, 0, val);
+	Parse(parser, 0, val, &root);
 	ParseFree(parser, free);
 
 	return root;

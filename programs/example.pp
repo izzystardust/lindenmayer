@@ -8,5 +8,5 @@ end;
 
 begin
 	read(x, y);
-	write(gcd(x, y))
+	write(gcd(x, y, z))
 end.

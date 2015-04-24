@@ -5,6 +5,7 @@
 
 
 %include {
+        #include <stdio.h>
 	#include <stdlib.h>
 	#include <assert.h>
 	#include "union.h"
@@ -16,7 +17,7 @@
 
 %token_type     {lexer_item}            // default type for terminals
 %default_type   {tree_t *}            // default type for nonterminals
-//%extra_argument {lexer_item_s *lexed} // lexer context
+%extra_argument {tree_t **root} // lexer context
 
 // http://stackoverflow.com/questions/11705737/expected-token-using-lemon-parser-generator
 %syntax_error {
@@ -47,97 +48,201 @@
 %nonassoc IF THEN ELSE.
 %nonassoc WHILE DO.
 
+%nonassoc PROCEDURE_CALL.
+%nonassoc DECL.
+%nonassoc IDONTKNOWYET.
+
 %left ASSIGNOP.
 %left RELOP.
 %left ADDOP.
 %left MULOP.
 %left NOT.
 
-program(A) ::=
+program(P) ::=
 	PROGRAM ID(I) LPAREN identifier_list(L) RPAREN SEMI
 	declarations(D)
 	subprogram_declarations(S)
 	compound_statement(C)
 	DOT.
 	{
+		//easy_break();
 		int n = 5;
 		tree_t **children = calloc(n, sizeof(tree_t *));
-		children[0] = I;
-		children[0] = NULL;
+		//children[0] = I;
+		//lexer_item_print(*I);
+		children[0] = make_leaf(I);
 		children[1] = L;
-		children[1] = NULL;
 		children[2] = D;
-		children[2] = NULL;
 		children[3] = S;
-		children[3] = NULL;
 		children[4] = C;
-		children[4] = NULL;
-		root = make_tree(PROGRAM, children, n);
-		fprintf(stderr, "t: %p\n", root);
-		print_tree(root);
-		A = root;
+		P = make_tree(PROGRAM, children, n);
+                *root = P;
 	}
-identifier_list ::= ID.
-identifier_list ::= identifier_list COMMA ID.
+identifier_list(L) ::= ID(I). { L = make_leaf(I); }
+identifier_list(L) ::= identifier_list(B) COMMA ID(I). {
+        L = add_child(B, make_leaf(I));
+}
 
-declarations ::= declarations VAR identifier_list COLON type SEMI.
-declarations ::= .
+declarations(D) ::= declarations(S) VAR identifier_list(L) COLON type(T) SEMI. {
+        tree_t ** c = calloc(sizeof(tree_t *), 2);
+        c[0] = L;
+        c[1] = T;
+        D = add_child(S, make_tree(VAR, c, 2));
+}
+declarations(D) ::= . {
+        D = malloc(sizeof(tree_t));
+        D->type = DOT;
+        D->nchildren = 0;
+}
 
-type ::= standard_type.
-type ::= ARRAY LBRKT NUM DOTDOT NUM RBRKT OF standard_type.
+type(T) ::= standard_type(S). { T = S; }
+type(T) ::= ARRAY LBRKT NUM(N) DOTDOT NUM(M) RBRKT OF standard_type(S). {
+        tree_t ** c = calloc(sizeof(tree_t *), 3);
+        c[0] = make_leaf(N);
+        c[1] = make_leaf(M);
+        c[2] = S;
+        T = make_tree(ARRAY, c, 3);
+}
 
-standard_type ::= INTEGER.
-standard_type ::= REAL.
+standard_type(T) ::= INTEGER(I). { T = make_leaf(I); }
+standard_type(T) ::= REAL(R).    { T = make_leaf(R); }
 
-subprogram_declarations ::= subprogram_declarations subprogram_declaration SEMI.
-subprogram_declarations ::= .
+subprogram_declarations(D) ::=
+        subprogram_declarations(S)
+        subprogram_declaration(N) SEMI.
+        {
+                D = add_child(S, N);
+        }
+subprogram_declarations(D) ::= . {
+        D = malloc(sizeof(tree_t));
+        D->type = IDONTKNOWYET;
+}
 
-subprogram_declaration ::= subprogram_head declarations compound_statement.
+subprogram_declaration(D) ::=
+        subprogram_head(H)
+        declarations(E)
+        compound_statement(C).
+        {
+                tree_t ** ch = calloc(sizeof(tree_t *), 3);
+                ch[0] = H;
+                ch[1] = E;
+                ch[2] = C;
+                D = make_tree(IDONTKNOWYET, ch, 3);
+        }
 
-subprogram_head ::= FUNCTION ID arguments COLON standard_type SEMI.
-subprogram_head ::= PROCEDURE ID arguments SEMI.
+subprogram_head(H) ::= FUNCTION ID(I) arguments(A) COLON standard_type(T) SEMI.{
+        tree_t ** ch = calloc(sizeof(tree_t *), 3);
+        ch[0] = make_leaf(I);
+        ch[1] = A;
+        ch[2] = T;
+        H = make_tree(FUNCTION, ch, 3);
+}
+subprogram_head(H) ::= PROCEDURE ID(I) arguments(A) SEMI. {
+        tree_t ** ch = calloc(sizeof(tree_t *), 2);
+        ch[0] = make_leaf(I);
+        ch[1] = A;
+        H = make_tree(PROCEDURE, ch, 2);
+}
 
-arguments ::= LPAREN parameter_list RPAREN.
-arguments ::= .
+arguments(A) ::= LPAREN parameter_list(L) RPAREN. { A = L; }
+arguments(A) ::= . { A = NULL; }
 
-parameter_list ::= identifier_list COLON type.
-parameter_list ::= parameter_list SEMI identifier_list COLON type.
+parameter_list(P) ::= identifier_list(I) COLON type(T). {
+        tree_t ** ch = calloc(sizeof(tree_t *), 2);
+        ch[0] = I;
+        ch[1] = T;
+        P = make_tree(DECL, ch, 2);
+}
+parameter_list(P) ::= parameter_list(L) SEMI identifier_list(I) COLON type(T). {
+        tree_t ** ch = calloc(sizeof(tree_t *), 2);
+        ch[0] = I;
+        ch[1] = T;
+        tree_t *t = make_tree(DECL, ch, 2);
+        P = add_child(L, t);
+}
 
-compound_statement ::= BBEGIN optional_statements END.
+compound_statement(C) ::= BBEGIN optional_statements(O) END. { C = O; }
 
-optional_statements ::= statement_list.
-optional_statements ::= .
+optional_statements(O) ::= statement_list(L). { O = L; }
+optional_statements(O) ::= . { O = NULL; }
 
-statement_list ::= statement.
-statement_list ::= statement_list SEMI statement.
+statement_list(L) ::= statement(S). { L = S; }
+statement_list(L) ::= statement_list(I) SEMI statement(T). {
+        L = add_child(T, I);
+}
 
-statement ::= variable ASSIGNOP expression.
-statement ::= procedure_statement.
-statement ::= compound_statement.
-statement ::= IF expression THEN statement ELSE statement.
-statement ::= WHILE expression DO statement.
+statement(S) ::= variable(V) ASSIGNOP(A) expression(E). {
+        tree_t **children = calloc(sizeof(tree_t *), 3);
+        children[0] = make_leaf(A);
+        children[1] = V;
+        children[2] = E;
+        S = make_tree(ASSIGNOP, children, 3);
+}
+statement(S) ::= procedure_statement(P). { S = P; }
+statement(S) ::= compound_statement(C). { S = C; }
+statement(S) ::= IF expression(E) THEN statement(T) ELSE statement(U). {
+        tree_t **children = calloc(sizeof(tree_t *), 3);
+        children[0] = E;
+        children[1] = T;
+        children[2] = U;
+        S = make_tree(IF, children, 3);
+}
 
-variable ::= ID.
-variable ::= ID LPAREN expression_list RPAREN.
+statement(S) ::= WHILE expression(E) DO statement(T). {
+        tree_t **children = calloc(sizeof(tree_t *), 2);
+        children[0] = E;
+        children[1] = T;
+        S = make_tree(WHILE, children, 2);
+}
 
-procedure_statement ::= ID.
-procedure_statement ::= ID LPAREN expression_list RPAREN.
+variable(V) ::= ID(I). { V = make_leaf(I); }
+variable(V) ::= ID(I) LPAREN expression_list(E) RPAREN. {
+        tree_t ** children = calloc(sizeof(tree_t *), 2);
+        children[0] = make_leaf(I);
+        children[1] = E;
+        V = make_tree(FUNCTION, children, 2);
+}
 
-expression_list ::= expression.
-expression_list ::= expression_list COMMA expression.
+procedure_statement(P) ::= ID(I). {
+        P = make_list(PROCEDURE_CALL, make_leaf(I));
+}
+procedure_statement(P) ::= ID(I) LPAREN expression_list(L) RPAREN. {
+        tree_t **list = calloc(sizeof(tree_t *), 2);
+        list[0] = make_leaf(I);
+        list[1] = L;
+        P = make_tree(PROCEDURE_CALL, list, 2);
+}
 
-expression ::= simple_expression.
-expression ::= simple_expression RELOP simple_expression.
+expression_list(L) ::= expression(E). { L = E; }
+expression_list(L) ::= expression_list(R) COMMA expression(E). {
+        L = add_child(R, E);
+}
 
-simple_expression ::= term.
-simple_expression ::= sign term.
-simple_expression ::= simple_expression ADDOP term.
+expression(E) ::= simple_expression(S). { E = S; }
+expression(E) ::= simple_expression(L) RELOP(O) simple_expression(R). {
+        E = make_bint(O, L, R);
+}
+
+simple_expression(E) ::= term(T). { E = T; }
+simple_expression(E) ::= sign term(T). { E = T; }
+simple_expression(E) ::= simple_expression(S) ADDOP(A) term(T). {
+        E = make_bint(A, S, T);
+}
 
 term(T) ::= factor(F). { T = F; }
-term ::= term MULOP factor.
+term(T) ::= term(L) MULOP(O) factor(R). {
+	T = make_bint(O, L, R);
+}
 
 factor(A) ::= ID(B). { A = make_leaf(B); }
-factor ::= ID LPAREN expression_list RPAREN.
+factor(A) ::= ID(I) LPAREN expression_list(L) RPAREN. {
+	// function or procedure call
+	tree_t ** children = calloc(sizeof(tree_t*), 2);
+	children[0] = make_leaf(I);
+	children[1] = L;
+
+	A = make_tree(FUNCTION, children, 2);
+}
 factor(A) ::= INUM(I). { A = make_leaf(I); }
 factor(A) ::= RNUM(R). { A = make_leaf(R); }
 factor(A) ::= LPAREN expression(B) RPAREN. { A = B; }

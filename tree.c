@@ -23,11 +23,13 @@ tree_t *make_list(int type, tree_t *next) {
 	return make_tree(type, new, 1);
 }
 
-tree_t *make_bint(int type, tree_t *left, tree_t *right) {
+tree_t *make_bint(lexer_item it, tree_t *left, tree_t *right) {
 	tree_t **new = calloc(sizeof(tree_t *), 2);
 	new[0] = left;
 	new[1] = right;
-	return make_tree(type, new, 2);
+	tree_t *ret =  make_tree(it.type, new, 2);
+	ret->attr = it.attr;
+	return ret;
 }
 
 tree_t *make_leaf(lexer_item it) {
@@ -39,27 +41,33 @@ tree_t *make_leaf(lexer_item it) {
 	return p;
 }
 
-void add_child(tree_t *parent, tree_t *child) {
+tree_t *add_child(tree_t *parent, tree_t *child) {
 	// yeah, growing by one is slow
-	fprintf(stderr, "children: %p", (void *)parent->children);
-	//print_tree(parent);
+	assert(NULL != parent);
+	assert(NULL != child);
 	parent->children = realloc(parent->children, parent->nchildren+1);
 	assert(NULL != parent->children);
 	parent->children[parent->nchildren] = child;
 	parent->nchildren++;
+	return parent;
 }
 
 static void print_tree_helper(tree_t *t, int depth) {
 	for (int i = 0; i < depth * 4; i++) {
 		fprintf(stderr, " ");
 	}
-	fprintf(stderr, "%s\n", sym_to_string(t->type));
+	fprintf(stderr, "%s", sym_to_string(t->type));
+	if (ID == t->type) {
+		fprintf(stderr, ": %s", t->attr.sval);
+	}
+	fprintf(stderr, "\n");
 	for (int i = 0; i < t->nchildren; i++) {
 		if (NULL != t->children[i]) {
 			print_tree_helper(t->children[i], depth + 1);
 		}
 	}
 }
+
 
 void print_tree(tree_t *t) {
 	print_tree_helper(t, 0);
