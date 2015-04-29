@@ -168,7 +168,7 @@ optional_statements(O) ::= . { O = NULL; }
 
 statement_list(L) ::= statement(S). { L = S; }
 statement_list(L) ::= statement_list(I) SEMI statement(T). {
-        L = add_child(T, I);
+        L = add_child(I, T);
 }
 
 statement(S) ::= variable(V) ASSIGNOP(A) expression(E). {
@@ -211,6 +211,7 @@ procedure_statement(P) ::= ID(I) LPAREN expression_list(L) RPAREN. {
         list[0] = make_leaf(I);
         list[1] = L;
         P = make_tree(PROCEDURE_CALL, list, 2);
+        print_tree(P);
 }
 
 expression_list(L) ::= expression(E). { L = E; }
