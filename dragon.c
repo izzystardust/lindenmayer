@@ -11,6 +11,9 @@
 #include "scan.h"
 #include "sglib.h"
 #include "tree.h"
+#include "semantic.h"
+#include "gencode.h"
+#include "symbol_table.h"
 
 /* lemon functions */
 void *ParseAlloc();
@@ -52,4 +55,13 @@ int main(int argc, char **argv) {
 	}
 	tree_t * t = parse(in);
 	print_tree(t);
+
+	symbol_table *table = create_symbol_table(root);
+	print_symbol_table(table);
+	char *check = check_semantics(t, table);
+	if (!check) {
+		gencode(t, "a.out");
+	} else {
+		fprintf(stderr, "Did not pass semantic checking: %s", check);
+	}
 }

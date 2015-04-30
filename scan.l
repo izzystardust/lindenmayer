@@ -16,6 +16,8 @@ ident		[a-zA-Z][a-zA-Z0-9]*
 number		[0-9]+
 real            [0-9]+"."[0-9]*
 whitespace	[ \t]+
+comment         \(\*.*\*\)
+oneline         [/][/](.*)[\n]
 
 %%
 
@@ -70,6 +72,8 @@ whitespace	[ \t]+
 {ident}		{ yylval->sval = strdup(yytext); return ID; }
 
 {whitespace}	{ ; }
+{oneline}       { ; }
+{comment}       { ; }
 \n		{ fprintf(stderr, "%s", yytext); }
 .		{ fprintf(stderr, "\nYou forgot something: <%c>\n", yytext[0]); return 0; }
 

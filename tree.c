@@ -43,9 +43,12 @@ tree_t *make_leaf(lexer_item it) {
 
 tree_t *add_child(tree_t *parent, tree_t *child) {
 	// yeah, growing by one is slow
+	if (parent == NULL) {
+		return make_list(child->type, child);
+	}
 	assert(NULL != parent);
 	assert(NULL != child);
-	parent->children = realloc(parent->children, parent->nchildren+1);
+	parent->children = realloc(parent->children, sizeof(tree_t*)*(parent->nchildren+1));
 	assert(NULL != parent->children);
 	parent->children[parent->nchildren] = child;
 	parent->nchildren++;
@@ -57,7 +60,7 @@ static void print_tree_helper(tree_t *t, int depth) {
 		fprintf(stderr, " ");
 	}
 	fprintf(stderr, "%s", sym_to_string(t->type));
-	if (ID == t->type) {
+	if (ID == t->type || t->type < 0 || t->type > 100) {
 		fprintf(stderr, ": %s", t->attr.sval);
 	}
 	fprintf(stderr, "\n");

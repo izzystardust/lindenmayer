@@ -1,6 +1,8 @@
 #ifndef _tree_h_
 #define _tree_h_
 
+#include <stdlib.h>
+
 #include "union.h"
 
 typedef struct tree_s {
@@ -8,6 +10,7 @@ typedef struct tree_s {
 	attr_t attr;
 	struct tree_s **children; // array of pointers to children
 	size_t nchildren;
+	int scope; // where to look up scope in
 } tree_t;
 
 tree_t *make_tree(int type, tree_t **children, size_t n);

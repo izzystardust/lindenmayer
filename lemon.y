@@ -66,15 +66,14 @@ program(P) ::=
 	DOT.
 	{
 		//easy_break();
-		int n = 5;
+		int n = 4;
 		tree_t **children = calloc(n, sizeof(tree_t *));
 		//children[0] = I;
 		//lexer_item_print(*I);
-		children[0] = make_leaf(I);
-		children[1] = L;
-		children[2] = D;
-		children[3] = S;
-		children[4] = C;
+		children[0] = add_child(make_leaf(I), L);
+		children[1] = D;
+		children[2] = S;
+		children[3] = C;
 		P = make_tree(PROGRAM, children, n);
                 *root = P;
 	}
@@ -90,9 +89,7 @@ declarations(D) ::= declarations(S) VAR identifier_list(L) COLON type(T) SEMI. {
         D = add_child(S, make_tree(VAR, c, 2));
 }
 declarations(D) ::= . {
-        D = malloc(sizeof(tree_t));
-        D->type = DOT;
-        D->nchildren = 0;
+        D = NULL;
 }
 
 type(T) ::= standard_type(S). { T = S; }
@@ -114,8 +111,7 @@ subprogram_declarations(D) ::=
                 D = add_child(S, N);
         }
 subprogram_declarations(D) ::= . {
-        D = malloc(sizeof(tree_t));
-        D->type = IDONTKNOWYET;
+        D = NULL;
 }
 
 subprogram_declaration(D) ::=
@@ -127,7 +123,7 @@ subprogram_declaration(D) ::=
                 ch[0] = H;
                 ch[1] = E;
                 ch[2] = C;
-                D = make_tree(IDONTKNOWYET, ch, 3);
+                D = make_tree(PROGRAM, ch, 3);
         }
 
 subprogram_head(H) ::= FUNCTION ID(I) arguments(A) COLON standard_type(T) SEMI.{
@@ -211,7 +207,6 @@ procedure_statement(P) ::= ID(I) LPAREN expression_list(L) RPAREN. {
         list[0] = make_leaf(I);
         list[1] = L;
         P = make_tree(PROCEDURE_CALL, list, 2);
-        print_tree(P);
 }
 
 expression_list(L) ::= expression(E). { L = E; }
