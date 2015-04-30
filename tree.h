@@ -2,6 +2,7 @@
 #define _tree_h_
 
 #include <stdlib.h>
+#include <Block.h>
 
 #include "union.h"
 
@@ -18,6 +19,10 @@ tree_t *make_list(int type, tree_t *next);
 tree_t *make_bint(lexer_item parent, tree_t *left, tree_t *right);
 tree_t *make_leaf(lexer_item it);
 tree_t *add_child(tree_t *parent, tree_t *child);
+
+typedef char *(^walkfunc)(tree_t *node);
+
+char *walk_tree(tree_t *root, walkfunc wf);
 
 void print_tree(tree_t *t);
 

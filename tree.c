@@ -61,7 +61,7 @@ static void print_tree_helper(tree_t *t, int depth) {
 	}
 	fprintf(stderr, "%s", sym_to_string(t->type));
 	if (ID == t->type || t->type < 0 || t->type > 100) {
-		fprintf(stderr, ": %s", t->attr.sval);
+		fprintf(stderr, ": %s (%d)", t->attr.sval, t->scope);
 	}
 	fprintf(stderr, "\n");
 	for (int i = 0; i < t->nchildren; i++) {
@@ -71,6 +71,18 @@ static void print_tree_helper(tree_t *t, int depth) {
 	}
 }
 
+#define I_AM_GROOT groot
+// I am Groot.
+char *walk_tree(tree_t *groot, walkfunc wf) {
+	if (I_AM_GROOT) {
+		char *err = wf(groot);
+		if (err != NULL) { return err; }
+		for (int i = 0; i < groot->nchildren; i++) {
+			walk_tree(groot->children[i], wf);
+		}
+	}
+	return NULL;
+}
 
 void print_tree(tree_t *t) {
 	print_tree_helper(t, 0);
