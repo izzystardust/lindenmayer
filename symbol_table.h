@@ -4,7 +4,8 @@
 typedef struct sym_entry_s {
         char *symbol;
         int type;
-        int args;
+        int numargs;
+        int args[]; // array containing numargs elements, each one the type of the argument
 } sym_entry;
 
 typedef struct symbol_list_s {
