@@ -18,9 +18,13 @@ tree_t *make_tree(int type, tree_t **children, size_t n) {
 }
 
 tree_t *make_list(int type, tree_t *next) {
-	tree_t **new = malloc(sizeof(tree_t **));
-	new[0] = next;
-	return make_tree(type, new, 1);
+	if (next) {
+		tree_t **new = malloc(sizeof(tree_t **));
+		new[0] = next;
+		return make_tree(type, new, 1);
+	} else {
+		return make_tree(type, NULL, 0);
+	}
 }
 
 tree_t *make_bint(lexer_item it, tree_t *left, tree_t *right) {
@@ -44,9 +48,8 @@ tree_t *make_leaf(lexer_item it) {
 tree_t *add_child(tree_t *parent, tree_t *child) {
 	// yeah, growing by one is slow
 	if (parent == NULL) {
-		return make_list(child->type, child);
+		return child;
 	}
-	assert(NULL != parent);
 	assert(NULL != child);
 	parent->children = realloc(parent->children, sizeof(tree_t*)*(parent->nchildren+1));
 	assert(NULL != parent->children);

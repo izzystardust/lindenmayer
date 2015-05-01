@@ -55,9 +55,9 @@ int main(int argc, char **argv) {
 	}
 	tree_t * t = parse(in);
 
-
-	symbol_table *table = create_symbol_table(root);
 	print_tree(t);
+	symbol_table *table = create_symbol_table(root);
+	// print_tree(t);
 	print_symbol_table(table);
 	char *check = check_semantics(t, table);
 	if (!check) {

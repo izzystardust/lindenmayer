@@ -11,6 +11,7 @@
 	#include "union.h"
 	#include "lemon.h"
 	#include "tree.h"
+        #include "sym.h"
 
 	extern tree_t *root;
 }
@@ -39,7 +40,7 @@
 %nonassoc LPAREN RPAREN.
 %nonassoc LBRKT RBRKT.
 
-%nonassoc PROGRAM.
+%nonassoc PROGRAM SUBPROGRAMS SUBPROGRAM.
 %nonassoc VAR.
 %nonassoc ARRAY OF DOTDOT.
 %nonassoc INTEGER REAL.
@@ -48,8 +49,9 @@
 %nonassoc IF THEN ELSE.
 %nonassoc WHILE DO.
 
+%nonassoc STATEMENTS.
 %nonassoc PROCEDURE_CALL.
-%nonassoc DECL.
+%nonassoc DECL DECLS.
 %nonassoc IDONTKNOWYET.
 
 %left ASSIGNOP.
@@ -76,20 +78,25 @@ program(P) ::=
 		children[3] = C;
 		P = make_tree(PROGRAM, children, n);
                 *root = P;
+
+                // walkfunc elide_double = ^(tree_t *node) {
+                //         // this looks for children of node that have exactly one
+                // };
 	}
-identifier_list(L) ::= ID(I). { L = make_leaf(I); }
+identifier_list(L) ::= ID(I). { L = make_list(VAR, make_leaf(I)); }
 identifier_list(L) ::= identifier_list(B) COMMA ID(I). {
         L = add_child(B, make_leaf(I));
 }
 
 declarations(D) ::= declarations(S) VAR identifier_list(L) COLON type(T) SEMI. {
         tree_t ** c = calloc(sizeof(tree_t *), 2);
+        int type = DECL;
         c[0] = L;
         c[1] = T;
-        D = add_child(S, make_tree(VAR, c, 2));
+        D = add_child(S, make_tree(type, c, 2));
 }
 declarations(D) ::= . {
-        D = NULL;
+        D = make_list(DECLS, NULL);
 }
 
 type(T) ::= standard_type(S). { T = S; }
@@ -111,7 +118,7 @@ subprogram_declarations(D) ::=
                 D = add_child(S, N);
         }
 subprogram_declarations(D) ::= . {
-        D = NULL;
+        D = make_list(SUBPROGRAMS, NULL);
 }
 
 subprogram_declaration(D) ::=
@@ -123,7 +130,7 @@ subprogram_declaration(D) ::=
                 ch[0] = H;
                 ch[1] = E;
                 ch[2] = C;
-                D = make_tree(PROGRAM, ch, 3);
+                D = make_tree(SUBPROGRAM, ch, 3);
         }
 
 subprogram_head(H) ::= FUNCTION ID(I) arguments(A) COLON standard_type(T) SEMI.{
@@ -141,13 +148,13 @@ subprogram_head(H) ::= PROCEDURE ID(I) arguments(A) SEMI. {
 }
 
 arguments(A) ::= LPAREN parameter_list(L) RPAREN. { A = L; }
-arguments(A) ::= . { A = NULL; }
+arguments(A) ::= . { A = make_list(DECLS, NULL); }
 
 parameter_list(P) ::= identifier_list(I) COLON type(T). {
         tree_t ** ch = calloc(sizeof(tree_t *), 2);
         ch[0] = I;
         ch[1] = T;
-        P = make_tree(DECL, ch, 2);
+        P = make_list(DECLS, make_tree(DECL, ch, 2));
 }
 parameter_list(P) ::= parameter_list(L) SEMI identifier_list(I) COLON type(T). {
         tree_t ** ch = calloc(sizeof(tree_t *), 2);
@@ -160,9 +167,9 @@ parameter_list(P) ::= parameter_list(L) SEMI identifier_list(I) COLON type(T). {
 compound_statement(C) ::= BBEGIN optional_statements(O) END. { C = O; }
 
 optional_statements(O) ::= statement_list(L). { O = L; }
-optional_statements(O) ::= . { O = NULL; }
+optional_statements(O) ::= . { O = make_list(STATEMENTS, NULL); }
 
-statement_list(L) ::= statement(S). { L = S; }
+statement_list(L) ::= statement(S). { L = make_list(STATEMENTS, S); }
 statement_list(L) ::= statement_list(I) SEMI statement(T). {
         L = add_child(I, T);
 }
