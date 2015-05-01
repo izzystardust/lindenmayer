@@ -76,7 +76,7 @@ oneline         [/][/](.*)[\n]
 {whitespace}	{ ; }
 {oneline}       { ; }
 {comment}       { ; }
-\n		{ fprintf(stderr, "%s", yytext); linecount++; }
+\n		{ linecount++; }
 .		{ fprintf(stderr, "\nYou forgot something: <%c>\n", yytext[0]); return 0; }
 
 %%
