@@ -81,10 +81,6 @@ program(P) ::=
 		children[3] = C;
 		P = make_tree(PROGRAM, children, n);
                 *root = P;
-
-                // walkfunc elide_double = ^(tree_t *node) {
-                //         // this looks for children of node that have exactly one
-                // };
 	}
 identifier_list(L) ::= ID(I). { L = make_list(VAR, make_leaf(I)); }
 identifier_list(L) ::= identifier_list(B) COMMA ID(I). {
@@ -103,7 +99,7 @@ declarations(D) ::= . {
 }
 
 type(T) ::= standard_type(S). { T = S; }
-type(T) ::= ARRAY LBRKT NUM(N) DOTDOT NUM(M) RBRKT OF standard_type(S). {
+type(T) ::= ARRAY LBRKT INUM(N) DOTDOT INUM(M) RBRKT OF standard_type(S). {
         tree_t ** c = calloc(sizeof(tree_t *), 3);
         c[0] = make_leaf(N);
         c[1] = make_leaf(M);
