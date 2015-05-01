@@ -52,7 +52,7 @@
 %nonassoc STATEMENTS.
 %nonassoc PROCEDURE_CALL.
 %nonassoc DECL DECLS.
-%nonassoc IDONTKNOWYET.
+%nonassoc EXPRESSIONS.
 
 %left ASSIGNOP.
 %left RELOP.
@@ -216,7 +216,7 @@ procedure_statement(P) ::= ID(I) LPAREN expression_list(L) RPAREN. {
         P = make_tree(PROCEDURE_CALL, list, 2);
 }
 
-expression_list(L) ::= expression(E). { L = E; }
+expression_list(L) ::= expression(E). { L = make_list(EXPRESSIONS, E); }
 expression_list(L) ::= expression_list(R) COMMA expression(E). {
         L = add_child(R, E);
 }
