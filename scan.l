@@ -27,7 +27,7 @@ oneline         [/][/](.*)[\n]
 "integer"	{ return INTEGER; }
 "real"		{ return REAL; }
 "function"	{ return FUNCTION; }
-"proceduce"	{ return PROCEDURE; }
+"procedure"	{ return PROCEDURE; }
 "begin"		{ return BBEGIN; }
 "end"		{ return END; }
 "if"		{ return IF; }
