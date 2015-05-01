@@ -8,14 +8,26 @@
 #include "sym.h"
 
 static int find_in_scope(symbol_table *table, int scope, char *want) {
-        symbol_list lst = table->list[scope];
+        symbol_list *lst = &table->list[scope];
 
-        for (int i = 0; i < lst.count; i++) {
-                if (strcmp(want, lst.symbols[i].symbol) == 0) {
+        for (int i = 0; i < lst->count; i++) {
+                if (strcmp(want, lst->symbols[i].symbol) == 0) {
                         return i;
                 }
         }
         return -1;
+}
+
+sym_entry *find_symbol(symbol_table *tab, int smallest_scope, char *name) {
+        int i = find_in_scope(tab, smallest_scope, name);
+        if (i != -1) {
+                return &tab->list[smallest_scope].symbols[i];
+        }
+        i = find_in_scope(tab, 0, name);
+        if (i != -1) {
+                return &tab->list[smallest_scope].symbols[i];
+        }
+        return NULL;
 }
 
 static int create_new_scope(symbol_table *tab) {
@@ -33,12 +45,16 @@ static sym_entry *push_sym(symbol_list *list, sym_entry e) {
         return &list->symbols[list->count-1];
 }
 
-static sym_entry *add_symbol(symbol_list *to, tree_t *node, int type) {
+static sym_entry *add_symbol(symbol_table *tab, int scope, tree_t *node, int type) {
+        if (find_in_scope(tab, scope, node->attr.sval) != -1) {
+                fprintf(stderr, "Error: in %dth function, %s is redeclared\n", scope, node->attr.sval);
+                exit(-1);
+        }
         sym_entry e;
         e.symbol = node->attr.sval;
         e.type = type;
         e.numargs = 0;//type != VAR ? count_args_prog(sym): 0;
-        return push_sym(to, e);
+        return push_sym(&tab->list[scope], e);
 }
 
 static void add_decls_to_scope(symbol_table *tab, int scope, tree_t *decls) {
@@ -48,7 +64,7 @@ static void add_decls_to_scope(symbol_table *tab, int scope, tree_t *decls) {
                 for (int j = 0; j < decl->children[0]->nchildren; j++) {
                         symbol_list *add_to = &tab->list[scope];
                         symbol_list t = *add_to;
-                        add_symbol(add_to, decl->children[0]->children[j], type);
+                        add_symbol(tab, scope, decl->children[0]->children[j], type);
                 }
         }
 }
@@ -62,19 +78,6 @@ static int count_args(tree_t *subprogram) {
         return arg_count;
 }
 
-// adds the subprogram name to the top scope and all of its variables to an inner scope.
-static void add_subprograms_to_scope(symbol_table *tab, int scope, tree_t *subprograms) {
-        for (int i = 0; i < subprograms->nchildren; i++) {
-                tree_t *subprog = subprograms->children[i];
-                sym_entry *e = add_symbol(&tab->list[scope],
-                                                subprog->children[0]->children[0],
-                                                subprog->children[0]->type);
-                e->numargs = count_args(subprog);
-                int internal_scope = create_new_scope(tab);
-                add_decls_to_scope(tab, internal_scope, subprog->children[0]->children[1]);
-        }
-}
-
 // returns a block that sets the scope of a node to new_scope
 static walkfunc make_set_scope_blk(int new_scope) {
         __block int i = new_scope;
@@ -82,6 +85,21 @@ static walkfunc make_set_scope_blk(int new_scope) {
                 root->scope = i;
                 return (char *)NULL;
         });
+}
+
+// adds the subprogram name to the top scope and all of its variables to an inner scope.
+static void add_subprograms_to_scope(symbol_table *tab, int scope, tree_t *subprograms) {
+        for (int i = 0; i < subprograms->nchildren; i++) {
+                tree_t *subprog = subprograms->children[i];
+                sym_entry *e = add_symbol(tab, scope,
+                                                subprog->children[0]->children[0],
+                                                subprog->children[0]->type);
+                e->numargs = count_args(subprog);
+                int internal_scope = create_new_scope(tab);
+                walkfunc set_scoper = make_set_scope_blk(internal_scope);
+                walk_tree(subprog, set_scoper);
+                add_decls_to_scope(tab, internal_scope, subprog->children[0]->children[1]);
+        }
 }
 
 symbol_table *create_symbol_table(tree_t *root) {
@@ -95,7 +113,7 @@ symbol_table *create_symbol_table(tree_t *root) {
         for (int i = 0; i < root->nchildren; i++) {
                 switch (root->children[i]->type) {
                 case ID: // top level id is program name
-                        e = add_symbol(ret->list, root->children[i], PROCEDURE);
+                        e = add_symbol(ret, 0, root->children[i], PROCEDURE);
                         // invariant: program is always declared as ex(foo, bar) with at least one
                         // thus it's first child has one child per arg.
                         // Not that I have any idea of what those can be used for...
@@ -108,6 +126,7 @@ symbol_table *create_symbol_table(tree_t *root) {
                         add_subprograms_to_scope(ret, 0, root->children[i]);
                         break;
                 case STATEMENTS:
+                        // better not have new variables in statements
                         break;
                 default:
                         fprintf(stderr,

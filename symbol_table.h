@@ -20,5 +20,6 @@ typedef struct symbol_table_s {
 
 symbol_table *create_symbol_table(tree_t *root);
 void print_symbol_table(symbol_table *tab);
+sym_entry *find_symbol(symbol_table *tab, int smallest_scope, char *name);
 
 #endif
