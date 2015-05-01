@@ -18,6 +18,14 @@ static int find_in_scope(symbol_table *table, int scope, char *want) {
         return -1;
 }
 
+static int create_new_scope(symbol_table *tab) {
+        tab->list = realloc(tab->list, sizeof(symbol_list)*(tab->len+1));
+        tab->list[tab->len].symbols = NULL;
+        tab->list[tab->len].count = 0;
+        tab->len++;
+        return tab->len-1;
+}
+
 static sym_entry *push_sym(symbol_list *list, sym_entry e) {
         list->symbols = realloc(list->symbols, (list->count+1)*sizeof(sym_entry));
         list->symbols[list->count] = e;
@@ -62,6 +70,8 @@ static void add_subprograms_to_scope(symbol_table *tab, int scope, tree_t *subpr
                                                 subprog->children[0]->children[0],
                                                 subprog->children[0]->type);
                 e->numargs = count_args(subprog);
+                int internal_scope = create_new_scope(tab);
+                add_decls_to_scope(tab, internal_scope, subprog->children[0]->children[1]);
         }
 }
 
