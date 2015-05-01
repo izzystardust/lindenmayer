@@ -46,7 +46,7 @@
 %nonassoc PROGRAM SUBPROGRAMS SUBPROGRAM.
 %nonassoc VAR.
 %nonassoc ARRAY OF DOTDOT.
-%nonassoc INTEGER REAL.
+%nonassoc INTEGER REAL BOOLEAN.
 %nonassoc FUNCTION PROCEDURE.
 %nonassoc BBEGIN END.
 %nonassoc IF THEN ELSE.

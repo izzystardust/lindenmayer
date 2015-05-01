@@ -97,6 +97,10 @@ static void add_subprograms_to_scope(symbol_table *tab, int scope, tree_t *subpr
                 sym_entry *e = add_symbol(tab, scope,
                                                 subprog->children[0]->children[0],
                                                 subprog->children[0]->type);
+                if (e->type == FUNCTION) {
+                        int last = subprog->children[0]->nchildren - 1;
+                        e->type = subprog->children[0]->children[last]->type;
+                }
                 e->numargs = count_args(subprog);
                 int internal_scope = create_new_scope(tab);
                 walkfunc set_scoper = make_set_scope_blk(internal_scope);
@@ -126,7 +130,7 @@ symbol_table *create_symbol_table(tree_t *root, char **builtins, int num_builtin
                 temp.scope = 0;
                 add_symbol(ret, 0, &temp, PROCEDURE);
         }
-        
+
         sym_entry *e;
         for (int i = 0; i < root->nchildren; i++) {
                 switch (root->children[i]->type) {

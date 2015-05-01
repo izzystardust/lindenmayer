@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
 	char *builtins[] = {"read", "write"};
 	symbol_table *table = create_symbol_table(root, builtins, 2);
 	print_tree(t);
-	print_symbol_table(table);
+	//print_symbol_table(table);
 	char *check = check_semantics(t, table);
 	if (!check) {
 		gencode(t, "a.out");
