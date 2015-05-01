@@ -63,13 +63,14 @@ int main(int argc, char **argv) {
 	}
 
 	//print_tree(t);
-	symbol_table *table = create_symbol_table(root);
+	char *builtins[] = {"read", "write"};
+	symbol_table *table = create_symbol_table(root, builtins, 2);
 	print_tree(t);
 	print_symbol_table(table);
 	char *check = check_semantics(t, table);
 	if (!check) {
 		gencode(t, "a.out");
 	} else {
-		fprintf(stderr, "Did not pass semantic checking: %s", check);
+		fprintf(stderr, "Did not pass semantic checking: %s\n", check);
 	}
 }

@@ -81,7 +81,10 @@ char *walk_tree(tree_t *groot, walkfunc wf) {
 		char *err = wf(groot);
 		if (err != NULL) { return err; }
 		for (int i = 0; i < groot->nchildren; i++) {
-			walk_tree(groot->children[i], wf);
+			err = walk_tree(groot->children[i], wf);
+			if (err) {
+				return err;
+			}
 		}
 	}
 	return NULL;

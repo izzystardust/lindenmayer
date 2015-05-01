@@ -18,7 +18,7 @@ typedef struct symbol_table_s {
         int len;
 } symbol_table;
 
-symbol_table *create_symbol_table(tree_t *root);
+symbol_table *create_symbol_table(tree_t *root, char **builtins, int num_builtins);
 void print_symbol_table(symbol_table *tab);
 sym_entry *find_symbol(symbol_table *tab, int smallest_scope, char *name);
 

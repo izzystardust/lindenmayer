@@ -9,12 +9,15 @@
 
 static int find_in_scope(symbol_table *table, int scope, char *want) {
         symbol_list *lst = &table->list[scope];
-
+        //fprintf(stderr, "Finding symbol %s in scope %d:\n", want, scope);
         for (int i = 0; i < lst->count; i++) {
+                //fprintf(stderr, "\tIs it \"%s\"? ", lst->symbols[i].symbol);
                 if (strcmp(want, lst->symbols[i].symbol) == 0) {
+                //        fprintf(stderr, "Yes!\n");
                         return i;
-                }
+                } //else fprintf(stderr, "No.\n");
         }
+        //fprintf(stderr, "Not found.\n");
         return -1;
 }
 
@@ -99,16 +102,31 @@ static void add_subprograms_to_scope(symbol_table *tab, int scope, tree_t *subpr
                 walkfunc set_scoper = make_set_scope_blk(internal_scope);
                 walk_tree(subprog, set_scoper);
                 add_decls_to_scope(tab, internal_scope, subprog->children[0]->children[1]);
+                if (subprog->children[1]->type == DECLS) {
+                        add_decls_to_scope(tab, internal_scope, subprog->children[1]);
+                }
         }
 }
 
-symbol_table *create_symbol_table(tree_t *root) {
+symbol_table *create_symbol_table(tree_t *root, char **builtins, int num_builtins) {
         walk_tree(root, make_set_scope_blk(0));
         symbol_table *ret = malloc(sizeof(symbol_table));
+
         ret->list = malloc(sizeof(symbol_list));
         ret->len = 1;
         ret->list->symbols = NULL;
         ret->list->count = 0;
+
+        for (int i = 0; i < num_builtins; i++) {
+                tree_t temp;
+                temp.type = PROCEDURE;
+                temp.attr.sval = builtins[i];
+                temp.nchildren = 0;
+                temp.children = NULL;
+                temp.scope = 0;
+                add_symbol(ret, 0, &temp, PROCEDURE);
+        }
+        
         sym_entry *e;
         for (int i = 0; i < root->nchildren; i++) {
                 switch (root->children[i]->type) {
@@ -118,6 +136,11 @@ symbol_table *create_symbol_table(tree_t *root) {
                         // thus it's first child has one child per arg.
                         // Not that I have any idea of what those can be used for...
                         e->numargs = root->children[i]->children[0]->nchildren;
+                        for (int j = 0; j < root->children[i]->children[0]->nchildren; j++) {
+                                add_symbol(ret, 0,
+                                        root->children[i]->children[0]->children[j],
+                                        VAR);
+                        }
                         break;
                 case DECLS:
                         add_decls_to_scope(ret, 0, root->children[i]);
