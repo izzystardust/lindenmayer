@@ -7,6 +7,8 @@
 
 #define YYSTYPE attr_t
 
+int linecount = 1;
+
 %}
 
 %option reentrant bison-bridge noyywrap yylineno
@@ -74,7 +76,7 @@ oneline         [/][/](.*)[\n]
 {whitespace}	{ ; }
 {oneline}       { ; }
 {comment}       { ; }
-\n		{ fprintf(stderr, "%s", yytext); }
+\n		{ fprintf(stderr, "%s", yytext); linecount++; }
 .		{ fprintf(stderr, "\nYou forgot something: <%c>\n", yytext[0]); return 0; }
 
 %%

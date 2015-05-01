@@ -13,7 +13,8 @@
 	#include "tree.h"
         #include "sym.h"
 
-	extern tree_t *root;
+	//extern tree_t *root;
+        extern int linecount;
 }
 
 %token_type     {lexer_item}            // default type for terminals
@@ -26,7 +27,7 @@
 	for (int i = 0; i < n; ++i) {
 		int a = yy_find_shift_action(yypParser, (YYCODETYPE)i);
 		if (a < YYNSTATE + YYNRULE) {
-			printf("possible token: %s\n", yyTokenName[i]);
+			printf("line %d: possible token: %s\n", linecount, yyTokenName[i]);
 		}
 	}
 }
