@@ -15,6 +15,7 @@
 
 	//extern tree_t *root;
         extern int linecount;
+        int parseerr = 0;
 }
 
 %token_type     {lexer_item}            // default type for terminals
@@ -30,6 +31,7 @@
 			printf("line %d: possible token: %s\n", linecount, yyTokenName[i]);
 		}
 	}
+        parseerr = -1;
 }
 
 %nonassoc INUM RNUM.

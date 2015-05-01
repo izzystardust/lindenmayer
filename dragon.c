@@ -20,6 +20,8 @@ void *ParseAlloc();
 void Parse();
 void ParseFree();
 
+extern int parseerr; // set if a parse error occurs
+
 int get_next_token(void *lexer, lexer_item *it) {
 	it->type = yylex(&it->attr, lexer);
 	return it->type;
@@ -46,6 +48,7 @@ tree_t * parse(FILE *f) {
 }
 
 int main(int argc, char **argv) {
+	errno = 0;
 	FILE *in = stdin;
 	if (argc > 1) {
 		FILE *a = fopen(argv[1], "r");
@@ -54,10 +57,14 @@ int main(int argc, char **argv) {
 		}
 	}
 	tree_t * t = parse(in);
+	if (parseerr) {
+		fprintf(stderr, "Fix parse errors to get more errors\n");
+		return -1;
+	}
 
-	print_tree(t);
+	//print_tree(t);
 	symbol_table *table = create_symbol_table(root);
-	// print_tree(t);
+	print_tree(t);
 	print_symbol_table(table);
 	char *check = check_semantics(t, table);
 	if (!check) {
